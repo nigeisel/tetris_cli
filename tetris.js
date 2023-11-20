@@ -40,6 +40,8 @@ export class Game {
     }
 
     tick() {
+        // TODO lose condition
+        // TODO award points
         if (!this.activePiece) {
             this.createNewPiece();
         }
