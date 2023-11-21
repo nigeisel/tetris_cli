@@ -2,7 +2,8 @@ import {Point, LeftL, LeftS, RightL, RightS, Box, I, Mushroom} from './shapes.js
 
 export class Game {
 
-    gameSpeed = 400;
+    gameSpeed = 20;
+    tickCount = 0;
 
     constructor() {
         this.gameArea = new GameArea();
@@ -25,15 +26,19 @@ export class Game {
             if (this.activePiece) {
                 if (key == '\u001B\u005B\u0041') {
                     this.activePiece.rotate(this.gameArea.deadPoints, this.gameArea.size);
+                    this.tick();
                 }
                 if (key == '\u001B\u005B\u0043') {
                     this.activePiece.moveRight(this.gameArea.deadPoints, this.gameArea.size);
+                    this.tick();
                 }
                 if (key == '\u001B\u005B\u0042') {
                     this.activePiece.moveDown(this.gameArea.deadPoints, this.gameArea.size);
+                    this.tick();
                 }
                 if (key == '\u001B\u005B\u0044') {
                     this.activePiece.moveLeft(this.gameArea.deadPoints, this.gameArea.size);
+                    this.tick();
                 }
             }
         });
@@ -45,11 +50,17 @@ export class Game {
         if (!this.activePiece) {
             this.createNewPiece();
         }
-        if (!this.activePiece.moveDown(this.gameArea.deadPoints, this.gameArea.size)) {
-            this.gameArea.deadPoints.push(...this.activePiece.getPoints());
-            this.gameArea.removeFullRows();
-            this.activePiece = null;
-        };
+
+        this.tickCount++;
+        
+        if (this.tickCount > 20) {
+            if (!this.activePiece.moveDown(this.gameArea.deadPoints, this.gameArea.size)) {
+                this.gameArea.deadPoints.push(...this.activePiece.getPoints());
+                this.gameArea.removeFullRows();
+                this.activePiece = null;
+            };
+            this.tickCount = 0;
+        }
         this.draw()
     }
 

@@ -27,7 +27,7 @@ export class Point {
 }
 
 // Define 3 points relative to main anchor point each Tetromino has -> defines the shapes of a tetromino
-class Shape {
+class TetrominoShape {
     constructor(b, c, d) {
         this.pointB = b;
         this.pointC = c;
@@ -55,16 +55,20 @@ export class Tetromino {
     constructor(gameAreaSize) {
         this.originPosition = new Point(Math.floor(gameAreaSize.x / 2), 0);
         this.rotation = 0;
-        this.shape = new Shape();
+        this.shape = new TetrominoShape();
     }
 
-    rotate() {
-        // TODO check if collision occurs before rotating
+    rotate(deadPoints, gameAreaSize) {
+        const collision = this.detectCollision(null, Math.PI / 2, deadPoints, gameAreaSize);
+        if (collision) {
+            return false;
+        }
         this.rotation = this.rotation + Math.PI / 2;
+        return true;
     }
 
     moveDown(deadPoints, gameAreaSize) {
-        const collision = this.detectCollision(new Point(0, 1), deadPoints, gameAreaSize);
+        const collision = this.detectCollision(new Point(0, 1), null, deadPoints, gameAreaSize);
         if (collision) {
             return false;
         }
@@ -73,7 +77,7 @@ export class Tetromino {
     }
 
     moveLeft(deadPoints, gameAreaSize) {
-        const collision = this.detectCollision(new Point(-1, 0), deadPoints, gameAreaSize);
+        const collision = this.detectCollision(new Point(-1, 0), null, deadPoints, gameAreaSize);
         if (collision) {
             return false;
         }
@@ -82,7 +86,7 @@ export class Tetromino {
     }
 
     moveRight(deadPoints, gameAreaSize) {
-        const collision = this.detectCollision(new Point(1, 0), deadPoints, gameAreaSize);
+        const collision = this.detectCollision(new Point(1, 0), null, deadPoints, gameAreaSize);
         if (collision) {
             return false;
         }
@@ -90,8 +94,8 @@ export class Tetromino {
         return true;
     }
 
-    detectCollision(offset, deadPoints, gameAreaSize) {
-        for (const point of this.getPoints(offset)) {
+    detectCollision(offset, rotation, deadPoints, gameAreaSize) {
+        for (const point of this.getPoints(offset, rotation)) {
             if (point.y >= gameAreaSize.y || point.x < 0 || point.x >= gameAreaSize.x) {
                 return true;
             }
@@ -105,8 +109,8 @@ export class Tetromino {
         return false;
     }
 
-    getPoints(withOffset) {
-        const rotatedPoints = this.shape.getRotatedPoints(this.rotation);
+    getPoints(withOffset, withRotation) {
+        const rotatedPoints = this.shape.getRotatedPoints(this.rotation + (withRotation || 0));
     
         const points = [this.originPosition]
             .concat(rotatedPoints.map((rotatedPoint) => this.originPosition.add(rotatedPoint)));
@@ -127,7 +131,7 @@ export class I extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(-1, 0), new Point(1, 0), new Point(2, 0))
+        this.shape = new TetrominoShape(new Point(-1, 0), new Point(1, 0), new Point(2, 0))
     }
 }
 
@@ -141,7 +145,7 @@ export class Box extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(1, 1), new Point(1, 0), new Point(0, 1))
+        this.shape = new TetrominoShape(new Point(1, 1), new Point(1, 0), new Point(0, 1))
     }
 }
 
@@ -155,7 +159,7 @@ export class Mushroom extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(0, 1), new Point(-1, 0), new Point(1, 0))
+        this.shape = new TetrominoShape(new Point(0, 1), new Point(-1, 0), new Point(1, 0))
     }
 }
 
@@ -169,7 +173,7 @@ export class LeftS extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(-1, 0), new Point(0, -1), new Point(1, -1))
+        this.shape = new TetrominoShape(new Point(-1, 0), new Point(0, -1), new Point(1, -1))
     }
 }
 
@@ -185,7 +189,7 @@ export class RightS extends Tetromino {
 
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(1, 0), new Point(0, 1), new Point(-1, 1))
+        this.shape = new TetrominoShape(new Point(1, 0), new Point(0, 1), new Point(-1, 1))
     }
 }
 
@@ -200,7 +204,7 @@ export class LeftL extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(-1, -1), new Point(1, 0), new Point(-1, 0))
+        this.shape = new TetrominoShape(new Point(-1, -1), new Point(1, 0), new Point(-1, 0))
     }
 }
 
@@ -215,6 +219,6 @@ export class RightL extends Tetromino {
      */
     constructor(gameAreaSize) {
         super(gameAreaSize);
-        this.shape = new Shape(new Point(1, -1), new Point(1, 0), new Point(-1, 0))
+        this.shape = new TetrominoShape(new Point(1, -1), new Point(1, 0), new Point(-1, 0))
     }
 }
